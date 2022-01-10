@@ -13,6 +13,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn import tree, svm, neighbors, ensemble
 from sklearn.ensemble import BaggingRegressor
+from sklearn import metrics
 
 # 1、实例化min-max函数，实现归一化，并输出到excel文件中
 def minmax():
@@ -73,48 +74,49 @@ def build_lr(x, y, name) :
                                                                                               y_test.shape))
     linreg_1 = LinearRegression()   #线性回归
     linreg_2 = tree.DecisionTreeRegressor()   #决策树回归
-    linreg_3 = svm.SVR()  #SVM回归
+    linreg_3 = svm.SVC()  #SVM回归
     linreg_4 = neighbors.KNeighborsRegressor()    #KNN回归
     linreg_5 = ensemble.RandomForestRegressor(n_estimators=20)    #随机森林回归
     linreg_6 = ensemble.AdaBoostRegressor(n_estimators = 50) #Adaboost回归
     linreg_7 = ensemble.GradientBoostingRegressor(n_estimators = 100) #GBRT回归
     linreg_8 = BaggingRegressor() #Bagging回归
     list = [linreg_1, linreg_2, linreg_3, linreg_4, linreg_5, linreg_6, linreg_7, linreg_8]
-    for i in range(0, 8):
-        print("-----------------------------------------------------------------")
-        print(list[i])
-        #训练
-        linreg = list[i]
-        model = linreg.fit(x_train, y_train)
-        #预测
-        y_pred = linreg.predict(x_test)
-        MSE = mean_squared_error(y_test, y_pred)
-        MAE = mean_absolute_error(y_test, y_pred)
-        R2 = cross_val_score(linreg, y_test, y_pred, cv = 5).mean() #使用交叉验证，其中k取5
-        print("均方差MSE为：", MSE)
-        print("平均绝对误差MAE为：", MAE)
-        print("R2为：", R2)
-        if (list[i] == linreg_5):
-            print("特征变量重要性", model.feature_importances_)
-        #做ROC曲线
-        plt.plot(range(len(y_pred)), y_pred, 'b', marker = 'o', label="predict", ls = '--')
-        plt.plot(range(len(y_pred)), y_test, 'r', marker = 'o', label="test", ls = '--')
-        plt.legend(loc="upper right")  # 显示图中的标签
-        plt.xlabel("样本点")
-        plt.ylabel("模锻终锻温度")
-        # if name == 1:
-            # plt.savefig(r'C:\Users\Carrot\Desktop\{}——模锻终锻温度未进行参数约简.png'.format(linreg), bbox_inches = 'tight', dpi = 300, pad_inches = 0)
-        # else :
-            # plt.savefig(r'C:\Users\Carrot\Desktop\{}——模锻终锻温度进行参数约简.png'.format(linreg), bbox_inches = 'tight', dpi = 300, pad_inches = 0)
-        plt.show()
+    # for i in range(0, 8):
+    # print("-----------------------------------------------------------------")
+    # print(list[i])
+    #训练
+    linreg = list[2]
+    model = linreg.fit(x_train, y_train)
+    #预测
+    y_pred = linreg.predict(x_test)
+    # MSE = mean_squared_error(y_test, y_pred)
+    # MAE = mean_absolute_error(y_test, y_pred)
+    # R2 = cross_val_score(linreg, y_test, y_pred, cv = 5).mean() #使用交叉验证，其中k取5
+    # print("均方差MSE为：", MSE)
+    # print("平均绝对误差MAE为：", MAE)
+    # print("R2为：", R2)
+    # if (list[i] == linreg_5):
+    #     print("特征变量重要性", model.feature_importances_)
+    print(metrics.f1_score(y_test, y_pred, average = 'weighted'))
+    #做ROC曲线
+    # plt.plot(range(len(y_pred)), y_pred, 'b', marker = 'o', label="predict", ls = '--')
+    # plt.plot(range(len(y_pred)), y_test, 'r', marker = 'o', label="test", ls = '--')
+    # plt.legend(loc="upper right")  # 显示图中的标签
+    # plt.xlabel("样本点")
+    # plt.ylabel("模锻终锻温度")
+    # if name == 1:
+        # plt.savefig(r'C:\Users\Carrot\Desktop\{}——模锻终锻温度未进行参数约简.png'.format(linreg), bbox_inches = 'tight', dpi = 300, pad_inches = 0)
+    # else :
+        # plt.savefig(r'C:\Users\Carrot\Desktop\{}——模锻终锻温度进行参数约简.png'.format(linreg), bbox_inches = 'tight', dpi = 300, pad_inches = 0)
+    # plt.show()
     return
 if __name__ == '__main__':
     # calculate_data()    #使用协方差计算相关系数，有person和spearman
     # str = "spearman"
     # plot_scatter(str)    #根据相关系数绘制散点图，有person和spearman
     # 未进行约简参数的
-    x_1 = pd.read_excel(r'C:\Users\Carrot\Desktop\data.xlsx', usecols="E:H").values#原始数表
-    y_1 = pd.read_excel(r'C:\Users\Carrot\Desktop\data.xlsx', usecols="I").values#原始数表
+    x_1 = pd.read_excel(r'C:\Users\Carrot\Desktop\data.xlsx', usecols="E:N").values#原始数表
+    y_1 = pd.read_excel(r'C:\Users\Carrot\Desktop\data.xlsx', usecols="O").values#原始数表
     name_1 = 1
     #进行约简参数的
     # x_2 = pd.read_excel(r'C:\Users\Carrot\Desktop\质量预测数据集.xlsx', sheet_name = 'Sheet3', usecols = "A:Q")#原始数表

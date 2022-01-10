@@ -10,7 +10,7 @@ import numpy as np
 import sklearn.svm
 from sklearn.metrics import mean_squared_error
 import math
-from sklearn import ensemble
+from sklearn import ensemble, metrics
 
 def reduce_features(solution, features):
     selected_elements_indices = np.where(solution == 1)[0]
@@ -45,12 +45,19 @@ def cal_pop_fitness(pop, features, train_X, test_X, train_y, test_y, fit_way, po
         test_labels = test_y.flatten()  # 把二维数组转换为一维数组
         if (fit_way == "classifier"):
             # 分类问题
-            SV_classifier = sklearn.svm.SVC(gamma='scale')
+            m_1 = 0 # 该个体的特征数
+            for feature in curr_solution:
+                if (feature == 1):
+                    m_1 = m_1 + 1
+            if (m_1 == 0):
+                continue
+            SV_classifier = sklearn.svm.SVC()
             SV_classifier.fit(X=train_data, y=train_labels.astype('int'))
             predictions = SV_classifier.predict(test_data)
             print("predictions is :", predictions)
             print("labels is :", test_labels)
-            accuracies[idx] = classification_accuracy(test_labels, predictions)
+            print("curr_solution is :", curr_solution)
+            accuracies[idx] = metrics.f1_score(test_labels, predictions, average = 'weighted')
             idx = idx + 1
 
         # 回归问题
@@ -89,13 +96,13 @@ def cal_pop_fitness(pop, features, train_X, test_X, train_y, test_y, fit_way, po
             # min_feature_reproducibility = min(min_feature_reproducibility, feature_reproducibility)
             print("复现精度 :", feature_reproducibility)
             feature_2.append(feature_reproducibility)
-    for idx in range(len(feature_1)):
-        try :
-            accuracies[idx] = feature_1[idx] + feature_2[idx]
-            if (accuracies[idx] == 0):
-                print("异常值的时候", curr_solution)
-        except:
-            print("Exception")
+    # for idx in range(len(feature_1)):
+    #     try :
+    #         accuracies[idx] = feature_1[idx] + feature_2[idx]
+    #         if (accuracies[idx] == 0):
+    #             print("异常值的时候", curr_solution)
+    #     except:
+    #         print("Exception")
     # max_feature_reproducibility = max(max_feature_reproducibility, 0)
     # min_feature_reproducibility = min(min_feature_reproducibility, 999)
     print("适应度 is :", accuracies)
@@ -131,7 +138,7 @@ def crossover(parents, offspring_size):
     return offspring
 
 
-def mutation(offspring_crossover, num_mutations=7):
+def mutation(offspring_crossover, num_mutations=4):
     mutation_idx = np.random.randint(low=0, high=offspring_crossover.shape[1], size=num_mutations)
     # Mutation changes a single gene in each offspring randomly.
     for idx in range(offspring_crossover.shape[0]):
